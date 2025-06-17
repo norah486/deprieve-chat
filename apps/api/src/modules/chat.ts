@@ -67,15 +67,4 @@ export const chat = new Elysia()
         message: t.String(),
       }),
     }
-  )
-  .delete("/chat", async () => {
-    await db.post.deleteMany();
-  })
-  .post("/chat-generate", async () => {
-    const p = await db.post.count();
-    await db.post.create({
-      data: {
-        message: `hello world ${p + 1}`,
-      },
-    });
-  });
+  );

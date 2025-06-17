@@ -5,26 +5,22 @@ import { cors } from "@elysiajs/cors";
 import { otel } from "@api/modules";
 import { db } from "./lib/db";
 import { chat } from "./modules/chat";
+import { auth } from "./lib/auth";
 
 export const app = new Elysia()
+  .mount(auth.handler)
   .use(swagger())
   .use(otel)
   .use(chat)
   .use(
     cors({
       origin: "http://localhost:5173",
+      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
       credentials: true,
+      allowedHeaders: ["Content-Type", "Authorization"],
     })
   )
   .get("/", () => "Hello Elysia")
-  .post("sign-up", async () => {
-    const total = await db.post.count();
-    await db.post.create({
-      data: {
-        message: `Hi - Post ID: ${total}`,
-      },
-    });
-  })
   .listen(Bun.env.PORT ?? 3000);
 
 export type app = typeof app;
