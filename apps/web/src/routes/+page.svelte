@@ -1,14 +1,16 @@
 <script lang="ts">
 	import { api } from '@libs';
 	import { onMount, tick } from 'svelte';
-	import type { Post } from 'apps/api/generated/prisma';
+	import type { Post, User } from 'apps/api/generated/prisma';
 	import { authClient } from '@web/lib/auth-client';
 
 	const session = authClient.useSession();
 
-	let posts: Post[] = $state([]);
+	type PostWithUser = Post & { user: User };
+	let posts: PostWithUser[] = $state([]);
 	let scrollbarDiv: HTMLDivElement | undefined = $state();
 	let noMoreData: boolean = $state(false);
+	let message: string = $state('');
 
 	async function fetchData() {
 		if (!scrollbarDiv || noMoreData) return;
@@ -48,16 +50,17 @@
 
 		chat.subscribe(async (message) => {
 			if (scrollbarDiv) {
-				// const top = scrollbarDiv.scrollTop;
-				// const scrollHeight = scrollbarDiv.scrollHeight;
 				posts.push(message.data);
-				//await tick().then(() => {
-				//	if (scrollbarDiv && top !== 0)
-				//		scrollbarDiv.scrollTop = top + scrollbarDiv.scrollHeight - scrollHeight;
-				//});
 			}
 		});
 	});
+
+	async function sendMessage() {
+		await api.chat.post({
+			message: message
+		});
+		message = '';
+	}
 </script>
 
 <h1>Welcome to SvelteKit</h1>
@@ -78,7 +81,14 @@ Session: {JSON.stringify($session)}
 >
 	<ul>
 		{#each posts as post}
-			<li>- {JSON.stringify(post.message)}</li>
+			<li><b class="font-bold">{post.user.name}</b>: {post.message}</li>
 		{/each}
 	</ul>
 </div>
+
+<br />
+
+<input class="border border-black p-2 ml-36" bind:value={message} placeholder="type a message" />
+<button class="hover:cursor-pointer bg-blue-400 p-2 rounded-lg" onclick={sendMessage}>
+	Send Message
+</button>

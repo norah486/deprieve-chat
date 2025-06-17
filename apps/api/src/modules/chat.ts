@@ -14,6 +14,16 @@ export const chat = new Elysia()
       id: t.Number(),
       message: t.String(),
       createdAt: t.Date(),
+      userId: t.String(),
+      user: t.Object({
+        id: t.String(),
+        name: t.String(),
+        email: t.String(),
+        emailVerified: t.Boolean(),
+        image: t.Nullable(t.String()),
+        createdAt: t.Date(),
+        updatedAt: t.Date(),
+      }),
     }),
   })
   .get(
@@ -37,6 +47,9 @@ export const chat = new Elysia()
         orderBy: {
           createdAt: "desc",
         },
+        include: {
+          user: true,
+        },
         take: Number(limit) || 50,
       });
 
@@ -56,6 +69,10 @@ export const chat = new Elysia()
         .create({
           data: {
             message: body.message,
+            userId: "nAaAoYfkqx0x0lCDkFO2V2ScysQmHH1Y",
+          },
+          include: {
+            user: true,
           },
         })
         .then((msg) => {
